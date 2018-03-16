@@ -1,0 +1,210 @@
+---
+title: National Park Visitation Trends Across the United States 
+subtitle: Computational Thinking for Governance Analytics
+author: Alexa Schreier - 16 March 2018
+output: pdf_document
+fontsize: 12pt
+header-includes:
+- \usepackage{pagecolor}
+---
+\pagecolor{white}
+
+1. Introduction 
+\newline
+Thousands of people from around the world visit the United States' National Parks each and every year. While the National Park Service is most well known for it's National Parks, the federal land managment agency is responsible for managing land under numerous other designations, such as National Monuments, National Historic Parks or Sites, and National Seashores, among others. Additionally, the National Park Service owns and manages land across the entire United States. This brief analysis aims to analyze user visitation trends across the United States to better understand what geographic regions visitors visit most often. 
+
+2. Data and Methods 
+\newline
+The data used for this analysis was collected and made accessible by the United States' National Park Service (NPS). The NPS categorizes land across the U.S. into seven distinct regions: Alaska, Pacific West, Intermountain, Midwest, Southeast, Northeast, and National Capital. This analysis focuses on the three western most regions: the Intermountain, Pacific West, and Alaska regions. These three regions are home to  some of the largest National Park; additionally, while the Alaska region is dramatically more remote and thus has fewer recorded recreation visits, the Intermountain and Pacific West regions both have high visitation rates.
+
+3. Findings 
+\newline
+In an examination of the number of NPS areas in each U.S. region compared with the number of recreation visits to each area, it can be seen that the number of areas does not directly correspond with number of recreation visits. In other words, even though the National Capital Region has only 34 areas, the region has high visitation rates. In contrast, while the Midwest Region is home to 55 NPS areas, the region's recrecation visit counts are substantially lower than most of the other regions. 
+
+```{r load_packages, include=FALSE}
+library(readxl)
+library(cluster)
+library(utils)
+library(rgdal)
+library(jsonlite)
+library(tidyverse)
+library(knitr)
+library(ggthemes)
+library(scales)
+library(ggmap)
+library(lubridate)
+
+temp = tempfile(fileext = ".xlsx")
+dataURL <- "https://github.com/alexaschreier/data/raw/master/data.xlsx" 
+download.file(dataURL, destfile=temp, mode='wb') 
+Parkdata = read_excel(temp, sheet =1)
+```
+
+```{r, echo = FALSE}
+names(Parkdata)=gsub("\r\n", " ", names(Parkdata))
+names(Parkdata)=gsub(" ", "_", names(Parkdata))
+```
+
+```{r, echo = FALSE, include=FALSE}
+length(Parkdata$Park_Name)==length(unique(Parkdata$Park_Name))
+Parkdata[duplicated(Parkdata$Park_Name),]
+repeated='Klondike Gold Rush'
+Parkdata[Parkdata$Park_Name ==repeated,]
+repeated='Klondike Gold Rush'
+Parkdata[(Parkdata$Park_Name ==repeated) & (Parkdata$Region =='Pacific West Region'),]
+repeated='Klondike Gold Rush'
+Parkdata=Parkdata[!((Parkdata$Park_Name ==repeated) & (Parkdata$Region =='Pacific West Region')),]
+```
+
+```{r echo = FALSE,fig.align='center'}
+Parkdata$countReg=1
+numericColumns =c("Recreation_Visits",'countReg')
+aggregateBY=Parkdata$Region
+
+region_amounts=aggregate(Parkdata[,numericColumns], by=list(aggregateBY), sum )
+names(region_amounts)=c('Region','Number of Recreation Visits','Number of Areas')
+
+knitr::kable(region_amounts)
+```
+
+```{r,echo = FALSE, include=FALSE}
+compressedMap="https://github.com/alexaschreier/PROJECT/raw/master/nps_boundary.zip"
+temp=tempfile()
+download.file(compressedMap, temp)
+unzip(temp)
+(maps=list.files(pattern = 'shp'))
+parkzipMap <- rgdal::readOGR("nps_boundary/nps_boundary.shp",stringsAsFactors=F)
+row.names(Parkdata)=NULL
+totalMap=merge(parkzipMap,Parkdata,by.x='UNIT_NAME',by.y='Park_Name')
+```
+
+```{r, echo = FALSE}
+AlaskaMap=totalMap[totalMap$Region %in% 'Alaska Region',]
+IntermounMap=totalMap[totalMap$Region %in% 'Intermountain Region',]
+midWMap=totalMap[totalMap$Region %in% 'Midwest Region',]
+natioCapMap=totalMap[totalMap$Region %in% 'National Capital Region',]
+northEMap=totalMap[totalMap$Region %in% 'Northeast Region',]
+pacWestMap=totalMap[totalMap$Region %in% 'Pacific West Region',]
+southEMap=totalMap[totalMap$Region %in% 'Southeast Region',]
+```
+
+```{r, eval = TRUE, include=FALSE}
+varToPlot=IntermounMap$Recreation_Visits
+```
+
+```{r, echo = FALSE, include=FALSE}
+compressedMap_intermountain="https://github.com/alexaschreier/PROJECT/raw/master/nps_boundary/intermountain.zip"
+temp=tempfile()
+download.file(compressedMap_intermountain, temp)
+unzip(temp)
+(maps=list.files(pattern = 'shp'))
+intermountain_zipMap <- rgdal::readOGR("intermountain.shp",stringsAsFactors=F)
+```
+
+```{r, eval=TRUE, include=FALSE}
+library(RColorBrewer)
+library(classInt)
+numberOfClasses = 3
+colorForScale='YlGnBu'
+colors = brewer.pal(numberOfClasses, colorForScale)
+intervals <- classIntervals(varToPlot, numberOfClasses, 
+                            style = "quantile",
+                            dataPrecision=2)
+colorPallette <- findColours(intervals, colors)
+```
+
+```{r, echo = FALSE,fig.align='center'}
+legendText="Count of visits"
+shrinkLegend=0.7
+title="Intermountain Region"
+
+plot(intermountain_zipMap,col='white',main=title)
+plot(IntermounMap, col = colorPallette,border=NA,add=TRUE)
+legend('topright', legend = names(attr(colorPallette, "table")),
+       fill = attr(colorPallette, "palette"), cex = shrinkLegend,
+       bty = "n",
+       title=legendText)
+```
+
+```{r, eval = TRUE, include=FALSE}
+varToPlot=pacWestMap$Recreation_Visits
+```
+
+```{r, echo = FALSE, include=FALSE}
+compressedMap_pacificwest="https://github.com/alexaschreier/PROJECT/raw/master/nps_boundary/pacificwest.zip"
+temp=tempfile()
+download.file(compressedMap_pacificwest, temp)
+unzip(temp)
+(maps=list.files(pattern = 'shp'))
+pacificwest_zipMap <- rgdal::readOGR("pacificwest.shp",stringsAsFactors=F)
+```
+
+```{r, echo = FALSE, include=FALSE}
+library(RColorBrewer)
+library(classInt)
+numberOfClasses = 3
+colorForScale='YlGnBu'
+colors = brewer.pal(numberOfClasses, colorForScale)
+intervals <- classIntervals(varToPlot, numberOfClasses, 
+                            style = "quantile",
+                            dataPrecision=2)
+colorPallette <- findColours(intervals, colors)
+```
+
+```{r, echo = FALSE,fig.align='center'}
+legendText="Count of visits"
+shrinkLegend=0.7
+title="Pacific West Region"
+
+plot(pacificwest_zipMap,col='white',main=title)
+plot(pacWestMap, col = colorPallette,border=NA,add=TRUE)
+legend('topleft', legend = names(attr(colorPallette, "table")), 
+       fill = attr(colorPallette, "palette"), cex = shrinkLegend, 
+       bty = "n",
+       title=legendText)
+```
+```{r, echo = FALSE, include=FALSE}
+varToPlot=AlaskaMap$Recreation_Visits
+```
+
+```{r, echo = FALSE, include=FALSE}
+compressedMap_alaska="https://github.com/alexaschreier/PROJECT/raw/master/Alaskaframe2.zip"
+temp=tempfile()
+download.file(compressedMap_alaska, temp)
+unzip(temp)
+(maps=list.files(pattern = 'shp'))
+alaska_zipMap <- rgdal::readOGR("alaskaframe (1).shp",stringsAsFactors=F)
+```
+
+```{r, echo = FALSE, include=FALSE}
+library(RColorBrewer)
+library(classInt)
+numberOfClasses = 3
+colorForScale='YlGnBu'
+colors = brewer.pal(numberOfClasses, colorForScale)
+intervals <- classIntervals(varToPlot, numberOfClasses, 
+                            style = "quantile",
+                            dataPrecision=2)
+colorPallette <- findColours(intervals, colors)
+```
+
+```{r, echo = FALSE,fig.align='center'}
+legendText="Count of visits"
+shrinkLegend=0.7
+title="Alaska Region"
+
+plot(alaska_zipMap,col='white',main=title)
+plot(AlaskaMap, col = colorPallette,border=NA,add=TRUE)
+legend('topright', legend = names(attr(colorPallette, "table")), 
+       fill = attr(colorPallette, "palette"), cex = shrinkLegend, 
+       bty = "n",
+       title=legendText)
+```
+
+4. Discussion
+\newline
+While it was mentioned above that there does not necessarily appear to be a correlation between the number of NPS managed areas within a region and the number of recreation visits within that region, the maps shown above illustrate another part of the story. In the lower 48 states, it appears that larger NPS areas have higher visitation rates than smaller areas. This is not surprising as larger NPS areas are likely better known and contain more novel characteristics and higher rates of biodiversity. In Alaska, as would be expected, there are higher recreation visit rates at the less remote areas closer to the mainland and populations within Alaska. 
+
+5. Conclusion
+\newline
+WRITE SOMETHING HERE
