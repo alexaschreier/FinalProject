@@ -1,25 +1,26 @@
 ---
-title: National Park Visitation Trends Across the United States 
+title: "National Park Visitation Trends Across the United States"
+author: "Alexa Schreier - 16 March 2018"
+header-includes: \usepackage{pagecolor}
+output:
+  html_document:
+    df_print: paged
 subtitle: Computational Thinking for Governance Analytics
-author: Alexa Schreier - 16 March 2018
-output: pdf_document
 fontsize: 12pt
-header-includes:
-- \usepackage{pagecolor}
 ---
 \pagecolor{white}
 
-1. Introduction 
+1.Introduction 
 \newline
-Thousands of people from around the world visit the United States' National Parks each and every year. While the National Park Service is most well known for it's National Parks, the federal land managment agency is responsible for managing land under numerous other designations, such as National Monuments, National Historic Parks or Sites, and National Seashores, among others. Additionally, the National Park Service owns and manages land across the entire United States. This brief analysis aims to analyze user visitation trends across the United States to better understand what geographic regions visitors visit most often. 
+Thousands of people from around the world visit the United States' National Parks each and every year. While the National Park Service is most well known for it's National Parks, the federal land managment agency is responsible for managing land under numerous other designations, such as National Monuments, National Historic Parks or Sites, and National Seashores, among others. Additionally, the National Park Service owns and manages land across the entire United States. This brief analysis aims to analyze user visitation trends across the United States in 2016 to better understand what geographic regions visitors visit most often. 
 
-2. Data and Methods 
+2.Data and Methods 
 \newline
-The data used for this analysis was collected and made accessible by the United States' National Park Service (NPS). The NPS categorizes land across the U.S. into seven distinct regions: Alaska, Pacific West, Intermountain, Midwest, Southeast, Northeast, and National Capital. This analysis focuses on the three western most regions: the Intermountain, Pacific West, and Alaska regions. These three regions are home to  some of the largest National Park; additionally, while the Alaska region is dramatically more remote and thus has fewer recorded recreation visits, the Intermountain and Pacific West regions both have high visitation rates.
+The data used for this analysis was collected and made accessible by the United States' National Park Service (NPS). The NPS categorizes land across the U.S. into seven distinct regions: Alaska, Pacific West, Intermountain, Midwest, Southeast, Northeast, and National Capital. This analysis focuses on the three western most regions: the Intermountain, Pacific West, and Alaska regions. These three regions are home to  some of the largest National Parks. Additionally, while the Alaska region is dramatically more remote and thus has fewer recorded recreation visits, the Intermountain and Pacific West regions both have high visitation rates.
 
-3. Findings 
+3.Findings 
 \newline
-In an examination of the number of NPS areas in each U.S. region compared with the number of recreation visits to each area, it can be seen that the number of areas does not directly correspond with number of recreation visits. In other words, even though the National Capital Region has only 34 areas, the region has high visitation rates. In contrast, while the Midwest Region is home to 55 NPS areas, the region's recrecation visit counts are substantially lower than most of the other regions. 
+In an examination of the number of NPS areas in each U.S. region compared with the number of recreation visits to each area, it can be seen that the number of areas does not directly correspond with number of recreation visits. In other words, even though the National Capital Region has only 34 areas, the region has high visitation rates. In contrast, while the Midwest Region is home to 55 NPS areas, the region's recrecation visit counts are substantially lower than most of the other regions. A breakdown of these visitation trends can be seen in the maps below. 
 
 ```{r load_packages, include=FALSE}
 library(readxl)
@@ -201,10 +202,10 @@ legend('topright', legend = names(attr(colorPallette, "table")),
        title=legendText)
 ```
 
-4. Discussion
+4.Discussion
 \newline
-While it was mentioned above that there does not necessarily appear to be a correlation between the number of NPS managed areas within a region and the number of recreation visits within that region, the maps shown above illustrate another part of the story. In the lower 48 states, it appears that larger NPS areas have higher visitation rates than smaller areas. This is not surprising as larger NPS areas are likely better known and contain more novel characteristics and higher rates of biodiversity. In Alaska, as would be expected, there are higher recreation visit rates at the less remote areas closer to the mainland and populations within Alaska. 
+While it was mentioned above that there does not necessarily appear to be a correlation between the number of NPS managed areas within a region and the number of recreation visits within that region, the maps shown above illustrate another part of the story. In the lower 48 states, it appears that larger NPS areas have higher visitation rates than smaller areas. This is not surprising as larger NPS areas are likely better known and contain more novel characteristics and higher rates of biodiversity. In Alaska, as would be expected, there are higher recreation visit rates at the less remote areas closer to the mainland and population centers within Alaska. 
 
-5. Conclusion
+5.Conclusion
 \newline
-WRITE SOMETHING HERE
+This analysis is only the beginning of the many ways data could be explored to better understand the ways in which people are visiting National Park managed land. Futher research could be done to combine multiple years of data to examine visitation trends over time. It would also be interesting to compare NPS visitation data with ecological impact data on the same areas to track how large of an impact those visitors have on the physical landscape. 
